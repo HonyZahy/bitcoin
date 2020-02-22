@@ -2511,7 +2511,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     fs::rename(temppath, path);
 
     UniValue result(UniValue::VOBJ);
-    result.pushKV("path", "end");
+    //result.pushKV("path", "end");
     return result;
 
 /////////////////////////////////////////////////////////////////////////////////////
