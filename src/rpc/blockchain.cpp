@@ -2466,7 +2466,8 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         fs::remove(path);
     }
 
-    FILE* fp = std::fopen(temppath.str(), "w");
+    //FILE* fp = std::fopen(temppath.str(), "w");
+    std::fstream fp(path.c_str(), std::ios::out);
 
     //FILE* file{fsbridge::fopen(temppath, "w")};
     //CAutoFile afile{file, SER_DISK, CLIENT_VERSION};
