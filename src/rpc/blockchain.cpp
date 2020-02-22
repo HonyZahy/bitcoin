@@ -759,28 +759,28 @@ static UniValue getblockhash(const JSONRPCRequest& request)
 
 static UniValue getblockhasx(const JSONRPCRequest& request)
 {
-            RPCHelpMan{"getblockhasx",
-                "\nReturns hash of block in best-block-chain at height provided.\n",
-                {
-                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
-                },
-                RPCResult{
-            "\"hash\"         (string) The block hash\n"
-                },
+           RPCHelpMan{"getblockhasx",
+                "\nHZ\n",
+                {},
+                RPCResults{},
                 RPCExamples{
-                    HelpExampleCli("getblockhasx", "1000")
-            + HelpExampleRpc("getblockhasx", "1000")
+                    HelpExampleCli("getblockhashx","")
+            + HelpExampleRpc("getblockhashx","")
                 },
             }.Check(request);
 
+
+
     LOCK(cs_main);
 
-    int nHeight = request.params[0].get_int();
+    int nHeight = 400000;
     if (nHeight < 0 || nHeight > ::ChainActive().Height())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     CBlockIndex* pblockindex = ::ChainActive()[nHeight];
-    return pblockindex->GetBlockHash().GetHex();
+    LogPrint(BCLog::RPC, "HZ %s \n", pblockindex->GetBlockHash().GetHex());
+ 
+    return NullUniValue; // pblockindex->GetBlockHash().GetHex();
 }
 
 static UniValue getblockheader(const JSONRPCRequest& request)
@@ -2524,7 +2524,7 @@ static const CRPCCommand commands[] =
     { "blockchain",         "getbestblockhash",       &getbestblockhash,       {} },
     { "blockchain",         "getblockcount",          &getblockcount,          {} },
     { "blockchain",         "getblock",               &getblock,               {"blockhash","verbosity|verbose"} },
-    { "blockchain",         "getblockhasx",           &getblockhasx,           {"height"} },
+    { "blockchain",         "getblockhasx",           &getblockhasx,           {} },
     { "blockchain",         "getblockhash",           &getblockhash,           {"height"} },
     { "blockchain",         "getblockhash2",           &getblockhash2,           {"height"} },
     { "blockchain",         "getblockheader",         &getblockheader,         {"blockhash","verbose"} },
