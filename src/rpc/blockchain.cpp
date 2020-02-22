@@ -2498,7 +2498,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     }
 
   
-    afile << blockHash.getHex() << '\n';
+    afile << blockHash.GetHex() << '\n';
 
     afile.fclose();
     fs::rename(temppath, path);
