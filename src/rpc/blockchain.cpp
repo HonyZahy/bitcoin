@@ -2466,10 +2466,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     fs::path temppath = fs::absolute("data.txt.incomplete", GetDataDir());
 
     if (fs::exists(path)) {
-        throw JSONRPCError(
-            RPC_INVALID_PARAMETER,
-            path.string() + " already exists. If you are sure this is what you want, "
-            "move it out of the way first");
+        fs::delete(path);
     }
 
     FILE* file{fsbridge::fopen(temppath, "w")};
@@ -2498,7 +2495,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     }
 
   
-    afile << blockHash.GetHex() << '\n';
+    afile << "\n" << (blockHash.GetHex()) << '\n';
 
     afile.fclose();
     fs::rename(temppath, path);
