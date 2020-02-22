@@ -2471,9 +2471,10 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     //FILE* file{fsbridge::fopen(temppath, "w")};
     //CAutoFile afile{file, SER_DISK, CLIENT_VERSION};
-    std::unique_ptr<CCoinsViewCursor> pcursor;
-    CCoinsStats stats;
-    CBlockIndex* tip;
+    
+    //std::unique_ptr<CCoinsViewCursor> pcursor;
+    //CCoinsStats stats;
+    //CBlockIndex* tip;
 
     {
         // We need to lock cs_main to ensure that the coinsdb isn't written to
@@ -2510,9 +2511,9 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     fp.close();
     fs::rename(temppath, path);
 
-    UniValue result(UniValue::VOBJ);
+    //UniValue result(UniValue::VOBJ);
     //result.pushKV("path", "end");
-    return result;
+    return NullUniValue;
 
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
