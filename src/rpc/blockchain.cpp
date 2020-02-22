@@ -2432,11 +2432,11 @@ UniValue dumptxoutset(const JSONRPCRequest& request)
 
 static UniValue dumpblock(const JSONRPCRequest& request)
 {
-    LogPrintf("%s: Warning: Found invalid chain at least ~6 blocks longer than our best chain.\nChain state database corruption likely.\n", __func__);
+    //LogPrintf("%s: .\n", __func__);
 
             RPCHelpMan{"dumpblock",
                 "\nHZ save block to file\n",
-                {//{"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+                { {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
                 },
                 RPCResult{
             "\"hash\"         ---\n"
@@ -2498,7 +2498,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     }
 
   
-    afile << blockHash << '\n';
+    afile << blockHash.getHex() << '\n';
 
     afile.fclose();
     fs::rename(temppath, path);
