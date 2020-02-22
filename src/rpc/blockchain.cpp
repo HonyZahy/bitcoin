@@ -757,6 +757,32 @@ static UniValue getblockhash(const JSONRPCRequest& request)
     return pblockindex->GetBlockHash().GetHex();
 }
 
+static UniValue getblockhasx(const JSONRPCRequest& request)
+{
+            RPCHelpMan{"getblockhasx",
+                "\nReturns hash of block in best-block-chain at height provided.\n",
+                {
+                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+                },
+                RPCResult{
+            "\"hash\"         (string) The block hash\n"
+                },
+                RPCExamples{
+                    HelpExampleCli("getblockhasx", "1000")
+            + HelpExampleRpc("getblockhasx", "1000")
+                },
+            }.Check(request);
+
+    LOCK(cs_main);
+
+    int nHeight = request.params[0].get_int();
+    if (nHeight < 0 || nHeight > ::ChainActive().Height())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+
+    CBlockIndex* pblockindex = ::ChainActive()[nHeight];
+    return pblockindex->GetBlockHash().GetHex();
+}
+
 static UniValue getblockheader(const JSONRPCRequest& request)
 {
             RPCHelpMan{"getblockheader",
@@ -2498,6 +2524,7 @@ static const CRPCCommand commands[] =
     { "blockchain",         "getbestblockhash",       &getbestblockhash,       {} },
     { "blockchain",         "getblockcount",          &getblockcount,          {} },
     { "blockchain",         "getblock",               &getblock,               {"blockhash","verbosity|verbose"} },
+    { "blockchain",         "getblockhash",           &getblockhasx,           {"height"} },
     { "blockchain",         "getblockhash",           &getblockhash,           {"height"} },
     { "blockchain",         "getblockhash2",           &getblockhash2,           {"height"} },
     { "blockchain",         "getblockheader",         &getblockheader,         {"blockhash","verbose"} },
