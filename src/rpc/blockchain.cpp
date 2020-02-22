@@ -3,6 +3,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <ostream>
 #include <rpc/blockchain.h>
 
 #include <amount.h>
@@ -2466,7 +2467,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     }
 
     FILE* file{fsbridge::fopen(temppath, "w")};
-    CAutoFile afile{file, SER_DISK, CLIENT_VERSION};
+    //CAutoFile afile{file, SER_DISK, CLIENT_VERSION};
     std::unique_ptr<CCoinsViewCursor> pcursor;
     CCoinsStats stats;
     CBlockIndex* tip;
@@ -2490,7 +2491,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     }
 
-    for (uint32_t i = 0; i < 10000; i++) {
+    for (int i = 0; i < 100000; i++) {
         int nHeight = i; //request.params[0].get_int();
         if (nHeight < 0 || nHeight > ::ChainActive().Height())
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
@@ -2499,10 +2500,10 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         uint256 blockHash = pblockindex->GetBlockHash();
 
 
-        afile <<  i << " " << blockHash.GetHex() << '\n';
+        file <<  nHeight << " " << blockHash.GetHex() << std::endl();
     }
 
-    afile.fclose();
+    file.fclose();
     fs::rename(temppath, path);
 
     UniValue result(UniValue::VOBJ);
