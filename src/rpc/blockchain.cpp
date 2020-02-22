@@ -2466,8 +2466,8 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         fs::remove(path);
     }
 
-    std::fstream myFs;
-    myFs.open(temppath, std::fstream::out);
+    FILE* fp = std::fopen(temppath, "w");
+
     //FILE* file{fsbridge::fopen(temppath, "w")};
     //CAutoFile afile{file, SER_DISK, CLIENT_VERSION};
     std::unique_ptr<CCoinsViewCursor> pcursor;
@@ -2502,10 +2502,10 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         uint256 blockHash = pblockindex->GetBlockHash();
 
 
-        myFs <<  nHeight << " " << blockHash.GetHex() << std::endl;
+        fp <<  nHeight << " " << blockHash.GetHex() << std::endl;
     }
 
-    myFs.close();
+    fp.close();
     fs::rename(temppath, path);
 
     UniValue result(UniValue::VOBJ);
