@@ -2449,16 +2449,12 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     LOCK(cs_main);
 
-    int nHeight = 400000; //request.params[0].get_int();
-    if (nHeight < 0 || nHeight > ::ChainActive().Height())
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
-
-    CBlockIndex* pblockindex = ::ChainActive()[nHeight];
-    uint256 blockHash = pblockindex->GetBlockHash();
 
 
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
+
+
 
     fs::path path = fs::absolute("data.txt", GetDataDir());
     // Write to a temporary path and then move into `path` on completion
@@ -2494,8 +2490,17 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     }
 
-  
-    afile << "\n" << (blockHash.GetHex()) << '\n';
+    for (int i = 0; i < 10000; i++) {
+        int nHeight = i; //request.params[0].get_int();
+        if (nHeight < 0 || nHeight > ::ChainActive().Height())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+
+        CBlockIndex* pblockindex = ::ChainActive()[nHeight];
+        uint256 blockHash = pblockindex->GetBlockHash();
+
+
+        afile << i << " " << (blockHash.GetHex()) << '\n';
+    }
 
     afile.fclose();
     fs::rename(temppath, path);
