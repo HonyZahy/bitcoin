@@ -2436,9 +2436,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
             RPCHelpMan{"dumpblock",
                 "\nHZ save block to file\n",
-                {
-                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
-                },
+                {{"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},},
                 RPCResult{
             "\"hash\"         ---\n"
                 },
