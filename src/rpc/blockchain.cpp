@@ -702,6 +702,35 @@ static UniValue getmempoolentry(const JSONRPCRequest& request)
     return info;
 }
 
+
+
+static UniValue getblockhash2(const JSONRPCRequest& request)
+{
+            RPCHelpMan{"getblockhash2",
+                "\nReturns hash of block in best-block-chain at height provided.\n",
+                {
+                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+                },
+                RPCResult{
+            "\"hash\"         (string) The block hash\n"
+                },
+                RPCExamples{
+                    HelpExampleCli("getblockhash2", "1000")
+            + HelpExampleRpc("getblockhash2", "1000")
+                },
+            }.Check(request);
+
+    LOCK(cs_main);
+
+    int nHeight = request.params[0].get_int();
+    if (nHeight < 0 || nHeight > ::ChainActive().Height())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+
+    CBlockIndex* pblockindex = ::ChainActive()[nHeight];
+    return pblockindex->GetBlockHash().GetHex();
+}
+
+
 static UniValue getblockhash(const JSONRPCRequest& request)
 {
             RPCHelpMan{"getblockhash",
@@ -2456,33 +2485,6 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 /////////////////////////////////////////////////////////////////////////////////////
 
 
-}
-
-
-static UniValue getblockhash2(const JSONRPCRequest& request)
-{
-            RPCHelpMan{"getblockhash",
-                "\nReturns hash of block in best-block-chain at height provided.\n",
-                {
-                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
-                },
-                RPCResult{
-            "\"hash\"         (string) The block hash\n"
-                },
-                RPCExamples{
-                    HelpExampleCli("getblockhash", "1000")
-            + HelpExampleRpc("getblockhash", "1000")
-                },
-            }.Check(request);
-
-    LOCK(cs_main);
-
-    int nHeight = request.params[0].get_int();
-    if (nHeight < 0 || nHeight > ::ChainActive().Height())
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
-
-    CBlockIndex* pblockindex = ::ChainActive()[nHeight];
-    return pblockindex->GetBlockHash().GetHex();
 }
 
 
