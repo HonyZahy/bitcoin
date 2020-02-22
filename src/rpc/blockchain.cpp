@@ -2490,7 +2490,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     }
 
-    for (int i = 0; i < 10000; i++) {
+    for (uint32_t i = 0; i < 10000; i++) {
         int nHeight = i; //request.params[0].get_int();
         if (nHeight < 0 || nHeight > ::ChainActive().Height())
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
@@ -2499,7 +2499,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         uint256 blockHash = pblockindex->GetBlockHash();
 
 
-        afile << i << " " << (blockHash.GetHex()) << '\n';
+        afile <<  i << " " << blockHash.GetHex() << '\n';
     }
 
     afile.fclose();
