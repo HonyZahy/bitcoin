@@ -2440,7 +2440,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     CBlockIndex* pblockindex = ::ChainActive()[nHeight];
-    uint256 blockHash = pblockindex->GetBlockHash().GetHex();
+    uint256 blockHash = pblockindex->GetBlockHash();
 
 
 /////////////////////////////////////////////////////////////////////////////////////
