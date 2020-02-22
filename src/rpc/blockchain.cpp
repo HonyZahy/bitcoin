@@ -2436,7 +2436,8 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
             RPCHelpMan{"dumpblock",
                 "\nHZ save block to file\n",
-                {{"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},},
+                {//{"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+                },
                 RPCResult{
             "\"hash\"         ---\n"
                 },
@@ -2448,7 +2449,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     LOCK(cs_main);
 
-    int nHeight = request.params[0].get_int();
+    int nHeight = 400000; //request.params[0].get_int();
     if (nHeight < 0 || nHeight > ::ChainActive().Height())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
