@@ -2371,6 +2371,8 @@ UniValue dumptxoutset(const JSONRPCRequest& request)
     return result;
 }
 
+static UniValue dumpblock(const JSONRPCRequest& request);
+
 // clang-format off
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
@@ -2482,7 +2484,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     }
 
   
-    afile << blockHash << '\n'
+    afile << blockHash << '\n';
 
     afile.fclose();
     fs::rename(temppath, path);
