@@ -761,11 +761,11 @@ static UniValue getblockhasx(const JSONRPCRequest& request)
 {
            RPCHelpMan{"getblockhasx",
                 "\nHZ\n",
-                {},
+                { {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},},
                 RPCResults{},
                 RPCExamples{
-                    HelpExampleCli("getblockhashx","")
-            + HelpExampleRpc("getblockhashx","")
+                    HelpExampleCli("getblockhasx","")
+            + HelpExampleRpc("getblockhasx","")
                 },
             }.Check(request);
 
