@@ -2494,7 +2494,8 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 
     }
 
-    for (int i = 0; i < 100000; i++) {
+    int nMaxHeight = ::ChainActive().Tip()->nHeight;
+    for (int i = 0; i < nMaxHeight; i++) {
         int nHeight = i; //request.params[0].get_int();
         if (nHeight < 0 || nHeight > ::ChainActive().Height())
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
@@ -2510,7 +2511,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     fs::rename(temppath, path);
 
     UniValue result(UniValue::VOBJ);
-    result.pushKV("path", path.string());
+    result.pushKV("path", "end");
     return result;
 
 /////////////////////////////////////////////////////////////////////////////////////
