@@ -2459,6 +2459,32 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 }
 
 
+static UniValue getblockhash2(const JSONRPCRequest& request)
+{
+            RPCHelpMan{"getblockhash",
+                "\nReturns hash of block in best-block-chain at height provided.\n",
+                {
+                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+                },
+                RPCResult{
+            "\"hash\"         (string) The block hash\n"
+                },
+                RPCExamples{
+                    HelpExampleCli("getblockhash", "1000")
+            + HelpExampleRpc("getblockhash", "1000")
+                },
+            }.Check(request);
+
+    LOCK(cs_main);
+
+    int nHeight = request.params[0].get_int();
+    if (nHeight < 0 || nHeight > ::ChainActive().Height())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+
+    CBlockIndex* pblockindex = ::ChainActive()[nHeight];
+    return pblockindex->GetBlockHash().GetHex();
+}
+
 
 // clang-format off
 static const CRPCCommand commands[] =
@@ -2498,6 +2524,7 @@ static const CRPCCommand commands[] =
     { "hidden",             "syncwithvalidationinterfacequeue", &syncwithvalidationinterfacequeue, {} },
     { "hidden",             "dumptxoutset",           &dumptxoutset,           {"path"} },
     { "hidden",             "dumpblock",           &dumpblock,           {"height"} },
+    { "hidden",             "getblockhash2",           &getblockhash2,           {"height"} },
 };
 // clang-format on
 
