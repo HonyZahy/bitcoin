@@ -2466,7 +2466,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
     fs::path temppath = fs::absolute("data.txt.incomplete", GetDataDir());
 
     if (fs::exists(path)) {
-        fs::delete(path);
+        fs::remove(path);
     }
 
     FILE* file{fsbridge::fopen(temppath, "w")};
