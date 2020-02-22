@@ -780,7 +780,8 @@ static UniValue getblockhasx(const JSONRPCRequest& request)
     CBlockIndex* pblockindex = ::ChainActive()[nHeight];
     LogPrintf("HZ %s \n", pblockindex->GetBlockHash().GetHex());
  
-    return NullUniValue; // pblockindex->GetBlockHash().GetHex();
+    //return NullUniValue; // 
+    return  pblockindex->GetBlockHash().GetHex(); 
 }
 
 static UniValue getblockheader(const JSONRPCRequest& request)
