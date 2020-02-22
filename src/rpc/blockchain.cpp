@@ -2446,10 +2446,10 @@ static UniValue dumpblock(const JSONRPCRequest& request)
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-    fs::path path = fs::absolute(request.params[0].get_str(), GetDataDir());
+    fs::path path = fs::absolute("data.txt", GetDataDir());
     // Write to a temporary path and then move into `path` on completion
     // to avoid confusion due to an interruption.
-    fs::path temppath = fs::absolute(request.params[0].get_str() + ".incomplete", GetDataDir());
+    fs::path temppath = fs::absolute("data.txt.incomplete", GetDataDir());
 
     if (fs::exists(path)) {
         throw JSONRPCError(
