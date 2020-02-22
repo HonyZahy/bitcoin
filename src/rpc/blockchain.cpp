@@ -778,7 +778,7 @@ static UniValue getblockhasx(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     CBlockIndex* pblockindex = ::ChainActive()[nHeight];
-    LogPrint(BCLog::RPC, "HZ %s \n", pblockindex->GetBlockHash().GetHex());
+    LogPrintf("HZ %s \n", pblockindex->GetBlockHash().GetHex());
  
     return NullUniValue; // pblockindex->GetBlockHash().GetHex();
 }
