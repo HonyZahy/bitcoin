@@ -2439,12 +2439,11 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         "\nHZ save block to file\n",
         { {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
         },
-        RPCResult{},
+        RPCResult{ },
         RPCExamples{
             HelpExampleCli("dumpblock", "1000")
     + HelpExampleRpc("dumpblock", "1000")
-        }
-        }.Check(request);
+        } }.Check(request);
 
     LOCK(cs_main);
 
