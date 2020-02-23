@@ -2443,9 +2443,8 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         RPCExamples{
             HelpExampleCli("dumpblock", "1000")
     + HelpExampleRpc("dumpblock", "1000")
-        },
-    
-    }.Check(request);
+        }
+        }.Check(request);
 
     LOCK(cs_main);
 
