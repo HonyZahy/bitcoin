@@ -2444,6 +2444,7 @@ static UniValue dumpblock(const JSONRPCRequest& request)
             HelpExampleCli("dumpblock", "1000")
     + HelpExampleRpc("dumpblock", "1000")
         },
+    
     }.Check(request);
 
     LOCK(cs_main);
