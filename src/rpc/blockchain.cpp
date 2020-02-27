@@ -46,6 +46,12 @@
 #include <memory>
 #include <mutex>
 
+
+extern "C" {
+	#include <rpc/unqlite.h>
+}
+
+
 struct CUpdatedBlock
 {
     uint256 hash;
@@ -2430,43 +2436,28 @@ UniValue dumptxoutset(const JSONRPCRequest& request)
 }
 
 
-
-static UniValue dumpblock(const JSONRPCRequest& request)
+void exportBlocks(int heightStart, int nBlocks)
 {
-    //LogPrintf("%s: .\n", __func__);
-
-    RPCHelpMan{"dumpblock",
-        "\nHZ save block to file\n",
-        { {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
-        },
-        RPCResult{""
-        },
-        RPCExamples{
-            HelpExampleCli("dumpblock", "1000")
-    + HelpExampleRpc("dumpblock", "1000")
-        },
-    }.Check(request);
-
-    LOCK(cs_main);
-
-
-
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
-
 
     fs::path path = fs::absolute("data.txt", GetDataDir());
-    // Write to a temporary path and then move into `path` on completion
-    // to avoid confusion due to an interruption.
-    fs::path temppath = fs::absolute("data.txt.incomplete", GetDataDir());
+    fs::path binPath = fs::absolute("data.bin", GetDataDir());
 
     if (fs::exists(path)) {
         fs::remove(path);
     }
 
+    if (fs::exists(binPath)) {
+        fs::remove(binPath);
+    }
+
     //FILE* fp = std::fopen(temppath.str(), "w");
-    std::fstream fp(path.c_str(), std::ios::out);
+
+    std::fstream fp;
+    fp.open(path.c_str(), std::fstream::out);
+
+    std::fstream fpBin;
+    fpBin.open(binPath.c_str(), std::fstream::out | std::fstream::binary);
+
 
     //FILE* file{fsbridge::fopen(temppath, "w")};
     //CAutoFile afile{file, SER_DISK, CLIENT_VERSION};
@@ -2488,35 +2479,249 @@ static UniValue dumpblock(const JSONRPCRequest& request)
         // See discussion here:
         //   https://github.com/bitcoin/bitcoin/pull/15606#discussion_r274479369
         //
-        LOCK(::cs_main);
+        //LOCK(::cs_main);
 
-        ::ChainstateActive().ForceFlushStateToDisk();
+        //::ChainstateActive().ForceFlushStateToDisk();
 
     }
 
-    int nMaxHeight = ::ChainActive().Tip()->nHeight;
-    for (int i = 0; i < nMaxHeight; i++) {
+
+
+    int nMaxHeight = heightStart + nBlocks;
+
+    if(nMaxHeight > ::ChainActive().Tip()->nHeight)
+    {
+    	nMaxHeight = ::ChainActive().Tip()->nHeight;
+	}
+
+    nBlocks = nMaxHeight - heightStart;
+
+    int qty = 0;
+    auto startTime = FormatISO8601DateTime(GetTime());
+
+    //::ChainActive().Tip()->nHeight;
+    // printf("max Id: %d", nMaxHeight);
+
+    for (int i = heightStart; i < nMaxHeight; i++) {
         int nHeight = i; //request.params[0].get_int();
         if (nHeight < 0 || nHeight > ::ChainActive().Height())
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Block heightStart out of range");
+
+        CBlockIndex* pblockindex = ::ChainActive()[nHeight];
+        uint256 blockHash = pblockindex->GetBlockHash();
+
+        //fp <<  nHeight << " " << pblockindex->nTx << std::endl;
+        int zero = 0;
+        fpBin.write( (char*)&zero, sizeof(zero) );
+        fpBin.write( (char*)&zero, sizeof(zero) );
+        fpBin.write( (char*)&zero, sizeof(zero) );
+        fpBin.write( (char*)&zero, sizeof(zero) );
+        fpBin.write( (char*)&zero, sizeof(zero) );
+
+        fpBin.write( (char*)&nHeight, sizeof(nHeight) );
+        fpBin.write( (char*)&pblockindex->nTx, sizeof(pblockindex->nTx) );
+
+        if((nHeight % 1000) == 0 ) {
+        	LogPrintf("Dumped block: %d\n", nHeight);
+        }
+
+        CBlock block = GetBlockChecked(pblockindex);
+
+        for (size_t posInBlock = 0; posInBlock < block.vtx.size(); ++posInBlock) {
+
+        	auto tx = block.vtx[posInBlock];
+
+			qty++;
+			//fp << " " << posInBlock << " " << tx->vin.size() << " " << tx->vout.size() << " " << tx->GetValueOut() << std::endl;
+
+			auto vinSize = tx->vin.size();
+			auto voutSize = tx->vout.size();
+			auto valueOut = tx->GetValueOut();
+
+			fpBin.write( (char*)&posInBlock, sizeof(posInBlock) );
+	        fpBin.write( (char*)&vinSize, sizeof(vinSize) );
+	        fpBin.write( (char*)&voutSize, sizeof(voutSize) );
+	        fpBin.write( (char*)&valueOut, sizeof(valueOut) );
+
+	        for (size_t posVin = 0; posVin < tx->vin.size(); ++posVin) {
+	        	auto vin = tx->vin[posVin];
+	        }
+
+	        for (size_t posVout = 0; posVout < tx->vout.size(); ++posVout) {
+	        	auto vout = tx->vout[posVout];
+	        }
+
+			//tx->GetHash().GetHex()
+        }
+
+        if(!IsRPCRunning()) {
+            fp.close();
+            LogPrintf("Dumped block: stop server shutdown\n");
+            return;
+        }
+    }
+
+    fp << startTime << "\n"
+    		<< qty << "\n"
+			<< FormatISO8601DateTime(GetTime()) <<  "\n";
+
+    fp.close();
+
+	LogPrintf("Dumped block: finish. Exported %d blocks\n", nBlocks);
+
+}
+
+
+void exportBlocks2(int heightStart, int nBlocks)
+{
+
+    fs::path path = fs::absolute("data.txt", GetDataDir());
+    fs::path binPath = fs::absolute("data.bin", GetDataDir());
+
+    if (fs::exists(path)) {
+        fs::remove(path);
+    }
+
+    if (fs::exists(binPath)) {
+        fs::remove(binPath);
+    }
+
+    //FILE* fp = std::fopen(temppath.str(), "w");
+
+    std::fstream fp;
+    fp.open(path.c_str(), std::fstream::out);
+
+
+    if(nBlocks == 0)
+    {
+    	nBlocks = 999999999;
+    }
+
+    int nMaxHeight = heightStart + nBlocks;
+
+    if(nMaxHeight > ::ChainActive().Tip()->nHeight)
+    {
+    	nMaxHeight = ::ChainActive().Tip()->nHeight;
+	}
+
+    nBlocks = nMaxHeight - heightStart;
+
+    int qty = 0;
+    auto startTime = FormatISO8601DateTime(GetTime());
+
+    int totalIn = 0;
+    int totalOut = 0;
+
+    //::ChainActive().Tip()->nHeight;
+    // printf("max Id: %d", nMaxHeight);
+
+    for (int i = heightStart; i < nMaxHeight; i++) {
+        int nHeight = i; //request.params[0].get_int();
+        if (nHeight < 0 || nHeight > ::ChainActive().Height())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Block heightStart out of range");
 
         CBlockIndex* pblockindex = ::ChainActive()[nHeight];
         uint256 blockHash = pblockindex->GetBlockHash();
 
 
-        fp <<  nHeight << " " << blockHash.GetHex() << std::endl;
+        int zero = 0;
+
+        int totalBlockIn = 0;
+        int totalBlockOut = 0;
+
+        CBlock block = GetBlockChecked(pblockindex);
+
+        for (size_t posInBlock = 0; posInBlock < block.vtx.size(); ++posInBlock) {
+
+        	auto tx = block.vtx[posInBlock];
+
+			qty++;
+
+			auto vinSize = tx->vin.size();
+			auto voutSize = tx->vout.size();
+			auto valueOut = tx->GetValueOut();
+
+
+			totalBlockIn += vinSize;
+			totalBlockOut += voutSize;
+			totalIn += vinSize;
+			totalOut += voutSize;
+
+			// fp << " " << posInBlock << " " << tx->vin.size() << " " << tx->vout.size() << " " << tx->GetValueOut() << std::endl;
+/*
+
+
+	        for (size_t posVin = 0; posVin < tx->vin.size(); ++posVin) {
+	        	auto vin = tx->vin[posVin];
+	        }
+
+	        for (size_t posVout = 0; posVout < tx->vout.size(); ++posVout) {
+	        	auto vout = tx->vout[posVout];
+	        }
+*/
+
+			//tx->GetHash().GetHex()
+        }
+
+        totalIn--; //minus coinbase in
+        totalBlockIn--;
+
+        if((nHeight % 1000) == 0 ) {
+        	LogPrintf("Dumped block: %d - total in: %d  out: %d  - dif: %d \n", nHeight, totalIn, totalOut, totalOut - totalIn);
+        }
+
+        fp <<  nHeight << " " << pblockindex->nTx << " " << totalBlockIn << " " << totalBlockOut << " "
+				<< totalIn << " " << totalOut << " " << (totalOut - totalIn) << std::endl;
+
+        if(!IsRPCRunning()) {
+            fp.close();
+            LogPrintf("Dumped block: stop server shutdown\n");
+            return;
+        }
     }
 
+    fp << startTime << "\n"
+    		<< qty << "\n"
+			<< FormatISO8601DateTime(GetTime()) <<  "\n";
+
     fp.close();
-    fs::rename(temppath, path);
+
+	LogPrintf("Dumped block: finish. Exported %d blocks\n", nBlocks);
+
+}
+
+
+
+
+static UniValue dumpblock(const JSONRPCRequest& request)
+{
+    //LogPrintf("%s: .\n", __func__);
+
+    RPCHelpMan{"dumpblock",
+        "\nHZ save block to file\n",
+        {
+            {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+			{"nblocks", RPCArg::Type::NUM, RPCArg::Optional::NO, "block quantity"},
+        },
+        RPCResults{},
+        RPCExamples{
+            HelpExampleCli("dumpblock", "1 1")
+    + HelpExampleRpc("dumpblock", "1 1")
+        },
+    }.Check(request);
+
+	//LOCK(cs_main);
+
+
+	int height = request.params[0].get_int();
+	int nblocks = request.params[1].get_int();
+
+	exportBlocks2(height, nblocks);
 
     //UniValue result(UniValue::VOBJ);
     //result.pushKV("path", "end");
+
     return NullUniValue;
-
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-
 
 }
 
@@ -2560,7 +2765,7 @@ static const CRPCCommand commands[] =
     { "hidden",             "waitforblockheight",     &waitforblockheight,     {"height","timeout"} },
     { "hidden",             "syncwithvalidationinterfacequeue", &syncwithvalidationinterfacequeue, {} },
     { "hidden",             "dumptxoutset",           &dumptxoutset,           {"path"} },
-    { "hidden",             "dumpblock",           &dumpblock,           {"height"} },
+    { "hidden",             "dumpblock",           &dumpblock,           {"height", "nblocks"} },
 };
 // clang-format on
 
